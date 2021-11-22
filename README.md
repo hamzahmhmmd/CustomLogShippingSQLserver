@@ -1,0 +1,2 @@
+# CustomLogShippingSQLserver
+Custom log shipping
