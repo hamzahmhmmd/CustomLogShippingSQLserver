@@ -2,7 +2,7 @@
 
 ## Alat dan Bahan
 - Windows (ditest pada Windows 11 Home edition)
-- SQLserver Express Edition, pada project ini menggunakan windows user authentication
+- SQL server 2019 Express Edition, pada project ini menggunakan windows user authentication
 - SQLCMD, cek `SQLCMD -?`, jika error install dari https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
 - FORFILES, cek `FORFILES -?`
 - VENV Python 3.8, cek `python --version`
