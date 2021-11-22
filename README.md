@@ -1,5 +1,7 @@
 # Custom Log Shipping SQL Server
 
+![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEOBPADFJGP2ZY2NL3BUSXRC "Custom Log Shipping Architecture")
+
 ## Alat dan Bahan
 - Windows (ditest pada Windows 11 Home edition)
 - SQL server 2019 Express Edition, pada project ini menggunakan windows user authentication
@@ -9,7 +11,7 @@
 - Mongodb v5.0.4, cek `mongo`
 
 ## Cara pembuatan
-0. git clone repo ini `git clone https://github.com/hamzahmhmmd/CustomLogShippingSQLserver`
+0. git clone repo ini `git clone https://github.com/hamzahmhmmd/CustomLogShippingSQLserver.git`
 1. install semua alat dan bahan, minimal 3 SQLserver, pada hal ini 
       - **master instance** : `localhost\SQLDEV`,
       - **backup instance** : `localhost\SQLLS1`, dan 
