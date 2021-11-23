@@ -35,6 +35,8 @@
   -v c:/SQL2:/tmp/SQL2 \
   -d mcr.microsoft.com/mssql/server:2019-latest
 ```
+daftar lengkap time zone selain Asia/Jakarta dapat dilihat [di sini](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+
 2. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `.\SQLLS1` begitu jg dengan `.\SQLLS2`.
 ```
 DECLARE @s NVARCHAR(128) = N'.\SQLLS1',
@@ -481,7 +483,7 @@ CREATE OR ALTER VIEW [dbo].[PMAG_BackupRestoreReport] AS SELECT
 	b.Location as [File Location],
 	DATEDIFF(millisecond, b.BackupTime, r.RestoreTime) as [Duration (millisecond)]
 FROM dbo.PMAG_LogBackupHistory b
-	JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID
+	JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance
 ```
 view berikut ini digunakan untuk melihat backup yang gagal ter restore.
 ```
@@ -495,7 +497,7 @@ SELECT
 	b.Location as [File Location],
 	DATEDIFF(millisecond, b.BackupTime, r.RestoreTime) as [Duration (millisecond)]
 FROM dbo.PMAG_LogBackupHistory b
-	FULL OUTER JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID
+	FULL OUTER JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance
 WHERE b.BackupSetID IS NULL OR r.BackupSetID IS NULL;
 ```
 17. view terakhir adalah untuk melihat backup instance mana yang sedang aktif (memiliki data paling up to date dibanding backup instece lain)
