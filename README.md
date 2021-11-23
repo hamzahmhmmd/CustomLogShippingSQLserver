@@ -4,6 +4,34 @@
 
 ## Reproduksi Docker
 1. Pembuatan docker container 
+```
+sudo docker run -e "ACCEPT_EULA=Y" \
+  -e "SA_PASSWORD=Root05211840000048" \
+  -p 1333:1433 \
+  --name sqlmaster \
+  -h sqlmaster \
+  -v c:/SQL1:/src/SQL1 \
+  -v c:/SQL2:/src/SQL2 \
+  -d mcr.microsoft.com/mssql/server:2019-latest
+```
+```
+sudo docker run -e "ACCEPT_EULA=Y" \
+  -e "SA_PASSWORD=Root05211840000048" \
+  -p 1334:1433 \
+  --name SQLLS1 \
+  -h SQLLS1 \
+  -v c:/SQL1:/src/SQL1 \
+  -d mcr.microsoft.com/mssql/server:2019-latest
+```
+```
+sudo docker run -e "ACCEPT_EULA=Y" \
+  -e "SA_PASSWORD=Root05211840000048" \
+  -p 1335:1433 \
+  --name SQLLS2 \
+  -h SQLLS2 \
+  -v c:/SQL2:/src/SQL2 \
+  -d mcr.microsoft.com/mssql/server:2019-latest
+```
 2. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `.\SQLLS1` begitu jg dengan `.\SQLLS2`.
 ```
 DECLARE @s NVARCHAR(128) = N'.\SQLLS1',
@@ -39,6 +67,13 @@ atau
 -> docker inspect -f"{{.NetworkSettings.IPAddress}}" sqlls1
 ```
 perintah yang sama jg berlaku untuk semua instance, tidak hanya `sqlls1`
+3. karena password user SA tersimpan sebagai variable environment pada container tersebut, maka dapat diganti dengan perintah berikut
+```
+> sudo docker exec -it sqlmaster /opt/mssql-tools/bin/sqlcmd \
+  -S localhost -U SA \
+  -P "$(read -sp "Enter current SA password: "; echo "${REPLY}")" \
+  -Q "ALTER LOGIN SA WITH PASSWORD=\"$(read -sp "Enter new SA password: "; echo "${REPLY}")\""
+```
 
 ## Reproduksi non-Docker
 
