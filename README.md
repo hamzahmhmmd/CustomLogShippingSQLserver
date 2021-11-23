@@ -483,7 +483,7 @@ CREATE OR ALTER VIEW [dbo].[PMAG_BackupRestoreReport] AS SELECT
 	b.Location as [File Location],
 	DATEDIFF(millisecond, b.BackupTime, r.RestoreTime) as [Duration (millisecond)]
 FROM dbo.PMAG_LogBackupHistory b
-	JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance
+	JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance AND b.DatabaseName= r.DatabaseName
 ```
 view berikut ini digunakan untuk melihat backup yang gagal ter restore.
 ```
@@ -497,7 +497,7 @@ SELECT
 	b.Location as [File Location],
 	DATEDIFF(millisecond, b.BackupTime, r.RestoreTime) as [Duration (millisecond)]
 FROM dbo.PMAG_LogBackupHistory b
-	FULL OUTER JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance
+	FULL OUTER JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance AND b.DatabaseName= r.DatabaseName
 WHERE b.BackupSetID IS NULL OR r.BackupSetID IS NULL;
 ```
 17. view terakhir adalah untuk melihat backup instance mana yang sedang aktif (memiliki data paling up to date dibanding backup instece lain)
