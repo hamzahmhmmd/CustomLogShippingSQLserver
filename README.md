@@ -5,31 +5,34 @@
 ## Reproduksi Docker
 1. Pembuatan docker container 
 ```
--> docker run -e "ACCEPT_EULA=Y" \
+-> docker run -e TZ=Asia/Jakarta \
+  -e "ACCEPT_EULA=Y" \
   -e "SA_PASSWORD=Root05211840000048" \
   -p 1333:1433 \
-  --name sqlmaster \
+  --name SQLMASTER \
   -h sqlmaster \
-  -v c:/SQL1:/src/SQL1 \
-  -v c:/SQL2:/src/SQL2 \
+  -v c:/SQL1:/tmp/SQL1 \
+  -v c:/SQL2:/tmp/SQL2 \
   -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 ```
--> docker run -e "ACCEPT_EULA=Y" \
+-> docker run -e TZ=Asia/Jakarta \
+  -e "ACCEPT_EULA=Y" \
   -e "SA_PASSWORD=Root05211840000048" \
   -p 1334:1433 \
   --name SQLLS1 \
   -h SQLLS1 \
-  -v c:/SQL1:/src/SQL1 \
+  -v c:/SQL1:/tmp/SQL1 \
   -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 ```
--> docker run -e "ACCEPT_EULA=Y" \
+-> docker run -e TZ=Asia/Jakarta \
+  -e "ACCEPT_EULA=Y" \
   -e "SA_PASSWORD=Root05211840000048" \
   -p 1335:1433 \
   --name SQLLS2 \
   -h SQLLS2 \
-  -v c:/SQL2:/src/SQL2 \
+  -v c:/SQL2:/tmp/SQL2 \
   -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 2. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `.\SQLLS1` begitu jg dengan `.\SQLLS2`.
