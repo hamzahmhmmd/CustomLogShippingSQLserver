@@ -1,6 +1,6 @@
 # Custom Log Shipping SQL Server
 
-![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEOBPADFJGP2ZY2NL3BUSXRC "Custom Log Shipping Architecture")
+![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
 ## Alat dan Bahan
 - Windows (ditest pada Windows 11 Home edition)
@@ -43,12 +43,13 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
-5. lalu pada instance **master** buat database `LSDB` dan membuat mode recovery FULL dengan 
+5. lalu pada instance **master** buat database `LSDB`. Database ini akan berisi beberapa tabel seperti gambar dibawah dan membuat mode recovery FULL dengan 
 ```
 USE [master];
 CREATE DATABASE LSDB;
 ALTER DATABASE LSDB SET RECOVERY FULL;
 ```
+![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20ERD.png?token=ALAAYUBGANWVXGXON4KECKTBUXIYS "Custom Log Shipping ERD")
 6. selanjutnya membuat table `PMAG_Databases` dimana menampung informasi nama database apa yang akan dibackup
 ```
 USE [LSDB];
@@ -513,6 +514,7 @@ password = "xxx"
 26. refresh web app, dan custom log shipping selesai terpasang
 
 ## Cara Penggunaan Web App
+![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
 
 ## Ucapan terimakasih
 - https://sqlperformance.com/2014/10/sql-performance/readable-secondaries-on-a-budget karena telah berbaik hati membagikan sourcode yang menjadi dasar pengembangan projek ini
