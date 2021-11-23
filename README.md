@@ -11,19 +11,13 @@
 - Mongodb v5.0.4, cek `mongo`
 
 ## Cara pembuatan
-0. git clone repo ini `git clone https://github.com/hamzahmhmmd/CustomLogShippingSQLserver.git`
-1. install semua alat dan bahan, minimal 3 SQLserver, pada hal ini 
+1. git clone repo ini `git clone https://github.com/hamzahmhmmd/CustomLogShippingSQLserver.git`
+2. install semua alat dan bahan, minimal 3 SQLserver, pada hal ini 
       - **master instance** : `localhost\SQLDEV`,
       - **backup instance** : `localhost\SQLLS1`, dan 
       - **backup instance**: `localhost\SQLLS2`
 3. install `requirements.txt`
-4. pada instance **master** buat database `LSDB` dan membuat mode recovery FULL dengan 
-```
-USE [master];
-CREATE OR ALTER DATABASE LSDB;
-ALTER DATABASE LSDB SET RECOVERY FULL;
-```
-5. membuat link dari **master** ke semua **backup** instance, pada hal ini `localhost\SQLLS1`
+4. setelah itu membuat link dari **master** ke semua **backup** instance, pada hal ini `localhost\SQLLS1`
 ```
 USE [master];
 GO
@@ -48,6 +42,12 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'collation 
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data access',          @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
+```
+5. lalu pada instance **master** buat database `LSDB` dan membuat mode recovery FULL dengan 
+```
+USE [master];
+CREATE OR ALTER DATABASE LSDB;
+ALTER DATABASE LSDB SET RECOVERY FULL;
 ```
 6. selanjutnya membuat table `PMAG_Databases` dimana menampung informasi nama database apa yang akan dibackup
 ```
