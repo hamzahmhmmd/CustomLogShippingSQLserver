@@ -46,7 +46,7 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out', 
 5. lalu pada instance **master** buat database `LSDB` dan membuat mode recovery FULL dengan 
 ```
 USE [master];
-CREATE OR ALTER DATABASE LSDB;
+CREATE DATABASE LSDB;
 ALTER DATABASE LSDB SET RECOVERY FULL;
 ```
 6. selanjutnya membuat table `PMAG_Databases` dimana menampung informasi nama database apa yang akan dibackup
