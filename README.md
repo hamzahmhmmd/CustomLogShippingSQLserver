@@ -5,7 +5,7 @@
 ## Reproduksi Docker
 1. Pembuatan docker container 
 ```
-sudo docker run -e "ACCEPT_EULA=Y" \
+-> docker run -e "ACCEPT_EULA=Y" \
   -e "SA_PASSWORD=Root05211840000048" \
   -p 1333:1433 \
   --name sqlmaster \
@@ -15,7 +15,7 @@ sudo docker run -e "ACCEPT_EULA=Y" \
   -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 ```
-sudo docker run -e "ACCEPT_EULA=Y" \
+-> docker run -e "ACCEPT_EULA=Y" \
   -e "SA_PASSWORD=Root05211840000048" \
   -p 1334:1433 \
   --name SQLLS1 \
@@ -24,7 +24,7 @@ sudo docker run -e "ACCEPT_EULA=Y" \
   -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 ```
-sudo docker run -e "ACCEPT_EULA=Y" \
+-> docker run -e "ACCEPT_EULA=Y" \
   -e "SA_PASSWORD=Root05211840000048" \
   -p 1335:1433 \
   --name SQLLS2 \
