@@ -2,7 +2,46 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
-## Alat dan Bahan
+## Reproduksi Docker
+1. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `./sqlls1` begitu jg dengan `./sqlls2`.
+```
+DECLARE @s NVARCHAR(128) = N'./sqlls1',
+        @t NVARCHAR(128) = N'true',
+        @p NVARCHAR(128) = N'MSOLEDBSQL',
+        @i NVARCHAR(128) = N'XXX.XXX.XXX.XXX,1433';
+EXEC [master].dbo.sp_addlinkedserver   @server     = @s, @srvproduct = N'', @provider = @p,  @datasrc  = @i;
+EXEC [master].dbo.sp_addlinkedsrvlogin @rmtsrvname = @s, @useself = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'collation compatible', @optvalue = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data access',          @optvalue = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
+```
+dan untuk backp instance `./sqlls2`
+```
+DECLARE @s NVARCHAR(128) = N'./sqlls2',
+        @t NVARCHAR(128) = N'true',
+        @p NVARCHAR(128) = N'MSOLEDBSQL',
+        @i NVARCHAR(128) = N'XXX.XXX.XXX.XXX,1433';
+EXEC [master].dbo.sp_addlinkedserver   @server     = @s, @srvproduct = N'', @provider = @p,  @datasrc  = @i;
+EXEC [master].dbo.sp_addlinkedsrvlogin @rmtsrvname = @s, @useself = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'collation compatible', @optvalue = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data access',          @optvalue = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
+EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
+```
+bila tidak tahu berapa alamat ip untuk setiap backup instance, maka dapat menggunakan perintah berikut pada CLI
+```
+-> docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' sqlls1
+```
+atau
+```
+-> docker inspect -f"{{.NetworkSettings.IPAddress}}" sqlls1
+```
+perintah yang sama jg berlaku untuk semua instance, tidakhanya `sqlls1`
+
+## Reproduksi non-Docker
+
+### Alat dan Bahan
 - Windows (ditest pada Windows 11 Home edition)
 - SQL server 2019 Express Edition, pada project ini menggunakan windows user authentication
 - SQLCMD, cek `SQLCMD -?`, jika error install dari https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
@@ -10,7 +49,7 @@
 - VENV Python 3.8, cek `python --version`
 - Mongodb v5.0.4, cek `mongo`
 
-## Cara pembuatan
+### Cara pembuatan
 1. git clone repo ini `git clone https://github.com/hamzahmhmmd/CustomLogShippingSQLserver.git`
 2. install semua alat dan bahan, minimal 3 SQLserver, pada hal ini 
       - **master instance** : `localhost\SQLDEV`,
