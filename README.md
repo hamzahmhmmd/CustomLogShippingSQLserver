@@ -53,7 +53,7 @@ ALTER DATABASE LSDB SET RECOVERY FULL;
 ```
 USE [LSDB];
 GO
-CREATE OR ALTER TABLE dbo.PMAG_Databases
+CREATE TABLE dbo.PMAG_Databases
 (
   DatabaseName               SYSNAME,
   LogBackupFrequency_Minutes SMALLINT NOT NULL DEFAULT (15),
@@ -65,7 +65,7 @@ GO
 ```
 USE [LSDB];
 GO
-CREATE OR ALTER TABLE dbo.PMAG_Secondaries
+CREATE TABLE dbo.PMAG_Secondaries
 (
   DatabaseName     SYSNAME,
   ServerInstance   SYSNAME,
@@ -81,7 +81,7 @@ CREATE OR ALTER TABLE dbo.PMAG_Secondaries
 ```
 8. table berikutnya adalah table `PMAG_LogBackupHistory` yang menampung informasi log backup yang berhasil dilakukan
 ```
-CREATE OR ALTER TABLE dbo.PMAG_LogBackupHistory
+CREATE TABLE dbo.PMAG_LogBackupHistory
 (
   DatabaseName   SYSNAME,
   ServerInstance SYSNAME,
@@ -97,7 +97,7 @@ CREATE OR ALTER TABLE dbo.PMAG_LogBackupHistory
 ```
 9. table terakhir `PMAG_LogRestoreHistory` adalah tabel yang menampung informasi file log apa yang berhasil ter-restore
 ```
-CREATE OR ALTER TABLE dbo.PMAG_LogRestoreHistory
+CREATE TABLE dbo.PMAG_LogRestoreHistory
 (
   DatabaseName   SYSNAME,
   ServerInstance SYSNAME,
@@ -455,6 +455,19 @@ SELECT
   StandByLocation = 'D:\SQLLS' + RIGHT(name, 1) + '\' 
 FROM sys.servers 
 WHERE name LIKE N'.\SQLLS[1-2]';
+```
+jika tidak yakin dimana lokasi DataFolder dan LogFolder dari instance maste, maka bisa dicek dengan query berikut
+```
+SELECT 
+    mdf.database_id, 
+    mdf.name, 
+    mdf.physical_name as data_file, 
+    ldf.physical_name as log_file, 
+    db_size = CAST((mdf.size * 8.0)/1024 AS DECIMAL(8,2)), 
+    log_size = CAST((ldf.size * 8.0 / 1024) AS DECIMAL(8,2))
+FROM (SELECT * FROM sys.master_files WHERE type_desc = 'ROWS' ) mdf
+JOIN (SELECT * FROM sys.master_files WHERE type_desc = 'LOG' ) ldf
+ON mdf.database_id = ldf.database_id
 ```
 20. setelah selesai, maka initial backup untuk `LSDB` dapat dilakukan dengan mengeksekusi SP `PMAG_Backup` dengan parameter `type = bak` dan `init = 1`
 ```
