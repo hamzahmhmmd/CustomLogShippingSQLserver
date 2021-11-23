@@ -3,9 +3,10 @@
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
 ## Reproduksi Docker
-1. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `./sqlls1` begitu jg dengan `./sqlls2`.
+1. Pembuatan docker container 
+2. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `.\SQLLS1` begitu jg dengan `.\SQLLS2`.
 ```
-DECLARE @s NVARCHAR(128) = N'./sqlls1',
+DECLARE @s NVARCHAR(128) = N'.\SQLLS1',
         @t NVARCHAR(128) = N'true',
         @p NVARCHAR(128) = N'MSOLEDBSQL',
         @i NVARCHAR(128) = N'XXX.XXX.XXX.XXX,1433';
@@ -16,9 +17,9 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
-dan untuk backp instance `./sqlls2`
+dan untuk backp instance `.\SQLLS2`
 ```
-DECLARE @s NVARCHAR(128) = N'./sqlls2',
+DECLARE @s NVARCHAR(128) = N'.\SQLLS2',
         @t NVARCHAR(128) = N'true',
         @p NVARCHAR(128) = N'MSOLEDBSQL',
         @i NVARCHAR(128) = N'XXX.XXX.XXX.XXX,1433';
@@ -37,7 +38,7 @@ atau
 ```
 -> docker inspect -f"{{.NetworkSettings.IPAddress}}" sqlls1
 ```
-perintah yang sama jg berlaku untuk semua instance, tidakhanya `sqlls1`
+perintah yang sama jg berlaku untuk semua instance, tidak hanya `sqlls1`
 
 ## Reproduksi non-Docker
 
