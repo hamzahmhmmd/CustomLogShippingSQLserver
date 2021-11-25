@@ -4,7 +4,7 @@
 
 > semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu command bash dan `>` yaitu command mongodb
 
-## Reproduksi Docker
+## Reproduksi docker-compose
 0. Clone repo ini dan masuk kedalam foldernya.
 1. Pembuatan docker image untuk SQLMASTER dan web app. Pertama tama masuk ke dalam folder `master-node/` dan jalankan perintah
 ```
