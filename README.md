@@ -20,6 +20,9 @@
 -> docker-compose up -d
 ```
 5. pastikan terdapat container group baru seperti gambar dibawah.
+
+![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20docker.png?token=ALAAYUCX3TUBSZNSJLPN4V3BVBTUK "Custom Log Shipping Docker")
+
 6. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
 7. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
 ```
@@ -46,19 +49,19 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
-9. lalu memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
+8. lalu memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
 ```
 -> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
 ```
-10. lakukan insiasi backup pertama kali dengan query berikut pada ssms
+9. lakukan insiasi backup pertama kali dengan query berikut pada ssms
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
-11. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
+10. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
-12. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503`
+11. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503`
 
 ## Reproduksi non-Docker
 
