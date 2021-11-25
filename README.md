@@ -5,69 +5,40 @@
 > semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu command bash dan `>` yaitu command mongodb
 
 ## Reproduksi Docker
-1. Pembuatan docker container 
+0. Clone repo ini dan masuk kedalam foldernya.
+1. Pembuatan docker image untuk SQLMASTER dan web app. Pertama tama masuk ke dalam folder `master-node/` dan jalankan perintah
 ```
--> docker run -e TZ=Asia/Jakarta \
-  -e "ACCEPT_EULA=Y" \
-  -e "SA_PASSWORD=Root05211840000048" \
-  -p 1333:1433 \
-  --name SQLMASTER \
-  -h sqlmaster \
-  -v c:/SQL1:/tmp/SQL1 \
-  -v c:/SQL2:/tmp/SQL2 \
-  -d mcr.microsoft.com/mssql/server:2019-latest
+-> docker build -t mssql2019-lsdb-linked:2 .
 ```
+2. selanjutnya masuk ke folder `web-app` dan jalankan perintah
 ```
--> docker run -e TZ=Asia/Jakarta \
-  -e "ACCEPT_EULA=Y" \
-  -e "SA_PASSWORD=Root05211840000048" \
-  -p 1334:1433 \
-  --name SQLLS1 \
-  -h SQLLS1 \
-  -v c:/SQL1:/tmp/SQL1 \
-  -d mcr.microsoft.com/mssql/server:2019-latest
+-> docker build -t log-shipping-web-app:3 .
 ```
+3. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
+4. keluar dari folder `web-app` dan jalankan perintah
 ```
--> docker run -e TZ=Asia/Jakarta \
-  -e "ACCEPT_EULA=Y" \
-  -e "SA_PASSWORD=Root05211840000048" \
-  -p 1335:1433 \
-  --name SQLLS2 \
-  -h SQLLS2 \
-  -v c:/SQL2:/tmp/SQL2 \
-  -d mcr.microsoft.com/mssql/server:2019-latest
+-> docker-compose up -d
 ```
-atau dapat menggunakan `docker-compose` pada file `docker-compose.yml`
-```
--> sudo docker-compose -f docker-compose.yml up -d
-```
-lalu memberikan permision user `mssql` di setiap instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
-```
--> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
--> sudo docker exec -u 0 SQLLS1 bash -c "chown mssql /tmp"
--> sudo docker exec -u 0 SQLLS2 bash -c "chown mssql /tmp"
-```
-daftar lengkap time zone selain Asia/Jakarta dapat dilihat [di sini](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-
-2. Menambahkan link server pada instance master, pada variable `@i` diisi dengan alamat ip dari backup instance `.\SQLLS1` begitu jg dengan `.\SQLLS2`.
+5. pastikan terdapat container group baru seperti gambar dibawah.
+6. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
+7. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
 ```
 DECLARE @s NVARCHAR(128) = N'.\SQLLS1',
         @t NVARCHAR(128) = N'true',
         @p NVARCHAR(128) = N'MSOLEDBSQL',
-        @i NVARCHAR(128) = N'XXX.XXX.XXX.XXX,1433';
+        @i NVARCHAR(128) = N'10.10.10.12,1433';
 EXEC [master].dbo.sp_addlinkedserver   @server     = @s, @srvproduct = N'', @provider = @p,  @datasrc  = @i;
 EXEC [master].dbo.sp_addlinkedsrvlogin @rmtsrvname = @s, @useself = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'collation compatible', @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data access',          @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
-```
-dan untuk backp instance `.\SQLLS2`
-```
+GO
+
 DECLARE @s NVARCHAR(128) = N'.\SQLLS2',
         @t NVARCHAR(128) = N'true',
         @p NVARCHAR(128) = N'MSOLEDBSQL',
-        @i NVARCHAR(128) = N'XXX.XXX.XXX.XXX,1433';
+        @i NVARCHAR(128) = N'10.10.10.12,1433';
 EXEC [master].dbo.sp_addlinkedserver   @server     = @s, @srvproduct = N'', @provider = @p,  @datasrc  = @i;
 EXEC [master].dbo.sp_addlinkedsrvlogin @rmtsrvname = @s, @useself = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'collation compatible', @optvalue = @t;
@@ -75,22 +46,19 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
-bila tidak tahu berapa alamat ip untuk setiap backup instance, maka dapat menggunakan perintah berikut pada CLI
+9. lalu memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
 ```
--> docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' sqlls1
+-> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
 ```
-atau
+10. lakukan insiasi backup pertama kali dengan query berikut pada ssms
 ```
--> docker inspect -f"{{.NetworkSettings.IPAddress}}" sqlls1
+EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
-perintah yang sama jg berlaku untuk semua instance, tidak hanya `sqlls1`
-3. karena password user SA tersimpan sebagai variable environment pada container tersebut, maka dapat diganti dengan perintah berikut
+11. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
 ```
-> sudo docker exec -it sqlmaster /opt/mssql-tools/bin/sqlcmd \
-  -S localhost -U SA \
-  -P "$(read -sp "Enter current SA password: "; echo "${REPLY}")" \
-  -Q "ALTER LOGIN SA WITH PASSWORD=\"$(read -sp "Enter new SA password: "; echo "${REPLY}")\""
+EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
+12. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503`
 
 ## Reproduksi non-Docker
 
@@ -142,7 +110,7 @@ CREATE DATABASE LSDB;
 ALTER DATABASE LSDB SET RECOVERY FULL;
 ```
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20ERD.png?token=ALAAYUBGANWVXGXON4KECKTBUXIYS "Custom Log Shipping ERD")
-6. selanjutnya membuat table `PMAG_Databases` dimana menampung informasi nama database apa yang akan dibackup
+6. selanjutnya membuat tabel-table diatas, pertamatama tabel `PMAG_Databases` dimana menampung informasi nama database apa yang akan dibackup. Selanjutnya  table `PMAG_Secondaries` yang akan berisi informasi mengenai backup instance. Table berikutnya adalah table `PMAG_LogBackupHistory` yang menampung informasi log backup yang berhasil dilakukan. Table terakhir `PMAG_LogRestoreHistory` adalah tabel yang menampung informasi file log apa yang berhasil ter-restore
 ```
 USE [LSDB];
 GO
@@ -153,11 +121,7 @@ CREATE TABLE dbo.PMAG_Databases
   CONSTRAINT PK_DBS PRIMARY KEY(DatabaseName)
 );
 GO
-```
-7. selanjutnya adalah membuat table `PMAG_Secondaries` yang akan berisi informasi mengenai backup instance
-```
-USE [LSDB];
-GO
+
 CREATE TABLE dbo.PMAG_Secondaries
 (
   DatabaseName     SYSNAME,
@@ -171,9 +135,8 @@ CREATE TABLE dbo.PMAG_Secondaries
   CONSTRAINT FK_Sec_DBs FOREIGN KEY(DatabaseName)
     REFERENCES dbo.PMAG_Databases(DatabaseName)
 );
-```
-8. table berikutnya adalah table `PMAG_LogBackupHistory` yang menampung informasi log backup yang berhasil dilakukan
-```
+GO
+
 CREATE TABLE dbo.PMAG_LogBackupHistory
 (
   DatabaseName   SYSNAME,
@@ -187,9 +150,8 @@ CREATE TABLE dbo.PMAG_LogBackupHistory
   CONSTRAINT FK_LBH_Sec FOREIGN KEY(DatabaseName, ServerInstance)
     REFERENCES dbo.PMAG_Secondaries(DatabaseName, ServerInstance)
 );
-```
-9. table terakhir `PMAG_LogRestoreHistory` adalah tabel yang menampung informasi file log apa yang berhasil ter-restore
-```
+GO
+
 CREATE TABLE dbo.PMAG_LogRestoreHistory
 (
   DatabaseName   SYSNAME,
@@ -202,6 +164,7 @@ CREATE TABLE dbo.PMAG_LogRestoreHistory
   CONSTRAINT FK_LRH_Sec FOREIGN KEY(DatabaseName, ServerInstance)
     REFERENCES dbo.PMAG_Secondaries(DatabaseName, ServerInstance)
 );
+GO
 ```
 10. selanjutnya membuat **store procedure** untuk menangani proses backup pada database `LSDB`
 ```
