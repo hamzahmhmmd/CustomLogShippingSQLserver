@@ -2,6 +2,8 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
+> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu command bash dan `>` yaitu command mongodb
+
 ## Reproduksi Docker
 1. Pembuatan docker container 
 ```
@@ -34,6 +36,16 @@
   -h SQLLS2 \
   -v c:/SQL2:/tmp/SQL2 \
   -d mcr.microsoft.com/mssql/server:2019-latest
+```
+atau dapat menggunakan `docker-compose` pada file `docker-compose.yml`
+```
+-> sudo docker-compose -f docker-compose.yml up -d
+```
+lalu memberikan permision user `mssql` di setiap instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
+```
+-> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
+-> sudo docker exec -u 0 SQLLS1 bash -c "chown mssql /tmp"
+-> sudo docker exec -u 0 SQLLS2 bash -c "chown mssql /tmp"
 ```
 daftar lengkap time zone selain Asia/Jakarta dapat dilihat [di sini](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
