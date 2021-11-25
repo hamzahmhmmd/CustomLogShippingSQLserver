@@ -1,0 +1,94 @@
+version: "3"
+
+networks:
+  frontend:
+    ipam:
+      config:
+        - subnet: 10.10.10.10/16
+services:
+  streamlit:
+    image: log-shipping-web-app:3
+    container_name: WEBAPP
+    ports:
+      - '8503:8501'
+    volumes:
+      - 'ls-transport-1:/tmp/SQL1:ro'
+      - 'ls-transport-2:/tmp/SQL2:ro'
+    networks:
+      frontend:
+        ipv4_address: 10.10.10.10
+  SQLMASTERc:
+    image: mssql2019-lsdb-linked:2
+    hostname: SQLMASTERc
+    container_name: SQLMASTERc
+    ports:
+      - "1336:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Root05211840000048
+      - TZ=Asia/Jakarta
+    volumes:
+      - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
+      - ./init/LSDB.bak:/docker-entrypoint-initdb.d/LSDB.bak:ro
+      - ./init/restore-LSDB.sql:/docker-entrypoint-initdb.d/restore-LSDB.sql:ro
+      - ./init/sqlcmd-restore-LSDB.sh:/docker-entrypoint-initdb.d/sqlcmd-restore-LSDB.sh:ro
+      - ls-transport-1:/tmp/SQL1
+      - ls-transport-2:/tmp/SQL2
+    networks:
+      frontend:
+        ipv4_address: 10.10.10.11
+    # entrypoint: 
+    #   - /opt/mssql/bin/sqlservr
+    #   - ./init/sqlcmd-restore-LSDB.sh
+    #   - ./init/mssql-chmod.sh
+  SQLLS1c:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: SQLLS1c
+    container_name: SQLLS1c
+    ports:
+      - "1337:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Root05211840000048
+      - TZ=Asia/Jakarta
+    volumes:
+      - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
+      - ls-transport-1:/tmp/SQL1
+    networks:
+      frontend:
+        ipv4_address: 10.10.10.12
+  SQLLS2c:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: SQLLS2c
+    container_name: SQLLS2c
+    ports:
+      - "1338:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Root05211840000048
+      - TZ=Asia/Jakarta
+    volumes:
+      - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
+      - ls-transport-2:/tmp/SQL2
+    networks:
+      frontend:
+        ipv4_address: 10.10.10.13
+  mongo:
+    container_name: mongoc
+    hostname: mongoc
+    image: mongo:5.0.4
+    environment:
+        MONGO_INITDB_DATABASE: logshipping
+    volumes:
+      - ./init/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - 27018:27017
+    networks:
+      frontend:
+        ipv4_address: 10.10.10.9
+    command: mongod
+volumes:
+  ls-transport-1:
+    external: false
+  ls-transport-2:
+    external: false

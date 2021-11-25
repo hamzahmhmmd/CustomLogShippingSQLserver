@@ -1,0 +1,1 @@
+chown -R mssql /tmp

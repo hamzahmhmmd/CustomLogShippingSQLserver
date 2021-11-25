@@ -1,0 +1,1 @@
+docker build -t mssql2019-lsdb-linked:2 .

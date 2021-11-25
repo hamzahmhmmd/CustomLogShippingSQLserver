@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/mssql/server:2019-latest
+
+ENV CHECK_POLICY=OFF
+ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=Root05211840000048
+ENV TZ=Asia/Jakarta
+
+COPY ./setup/* /setup/
+
+RUN ( /opt/mssql/bin/sqlservr --accept-eula & ) | grep -q "Service Broker manager has started" \
+    && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${SA_PASSWORD} -i /setup/restore-LSDB.sql \
+    && pkill sqlservr 
+
+# RUN /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${SA_PASSWORD} -i /setup/linkedserver.sql
+
+USER root
+RUN chown -R mssql /tmp
+USER mssql
+
+CMD ["/opt/mssql/bin/sqlservr"]
