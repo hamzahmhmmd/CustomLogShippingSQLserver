@@ -37,10 +37,6 @@ services:
     networks:
       frontend:
         ipv4_address: 10.10.10.11
-    # entrypoint: 
-    #   - /opt/mssql/bin/sqlservr
-    #   - ./init/sqlcmd-restore-LSDB.sh
-    #   - ./init/mssql-chmod.sh
   SQLLS1c:
     image: mcr.microsoft.com/mssql/server:2019-latest
     hostname: SQLLS1c
@@ -53,7 +49,7 @@ services:
       - TZ=Asia/Jakarta
     volumes:
       - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
-      - ls-transport-1:/tmp/SQL1
+      - ls-transport-1:/tmp/SQL1:ro
     networks:
       frontend:
         ipv4_address: 10.10.10.12
@@ -69,7 +65,7 @@ services:
       - TZ=Asia/Jakarta
     volumes:
       - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
-      - ls-transport-2:/tmp/SQL2
+      - ls-transport-2:/tmp/SQL2:ro
     networks:
       frontend:
         ipv4_address: 10.10.10.13
