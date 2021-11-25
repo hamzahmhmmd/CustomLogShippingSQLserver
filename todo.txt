@@ -1,0 +1,2 @@
+buat .bak yang proper
+streamlit app masih masalah di ODBC, selesaiin

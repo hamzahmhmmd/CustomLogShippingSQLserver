@@ -12,7 +12,7 @@
 ```
 2. selanjutnya masuk ke folder `web-app` dan jalankan perintah
 ```
--> docker build -t log-shipping-web-app:3 .
+-> docker build -t log-shipping-web-app:4 .
 ```
 3. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
 4. keluar dari folder `web-app` dan jalankan perintah

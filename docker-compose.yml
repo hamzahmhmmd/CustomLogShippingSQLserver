@@ -7,7 +7,7 @@ networks:
         - subnet: 10.10.10.10/16
 services:
   streamlit:
-    image: log-shipping-web-app:3
+    image: log-shipping-web-app:4
     container_name: WEBAPP
     ports:
       - '8503:8501'
