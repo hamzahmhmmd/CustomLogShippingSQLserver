@@ -2,29 +2,36 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
-> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu command bash dan `>` yaitu command mongodb
+> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu command bash pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux bash command, dan `>` yaitu script mongodb
 
-## Reproduksi docker-compose
-0. Clone repo ini dan masuk kedalam foldernya.
-1. Pembuatan docker image untuk SQLMASTER dan web app. Pertama tama masuk ke dalam folder `master-node/` dan jalankan perintah
+## Reproduksi berbasis Docker
+
+### Alat dan bahan
+- Docker desktop (di test pada windows 11 dengan WSL2 backedend, namun seharusnya tidak masalah apapun host OS nya)
+- SSMS (recommended, karena dapat mengobservasi linked server) atau sejenisnya
+- Jaringan internet, karena harus mendownload docker image yang besar
+
+### Cara Pembuatan
+1. Clone repo ini dan masuk kedalam foldernya.
+2. Pembuatan docker image untuk SQLMASTER dan web app. Pertama tama masuk ke dalam folder `master-node/` dan jalankan perintah
 ```
 -> docker build -t mssql2019-lsdb-linked:2 .
 ```
-2. selanjutnya masuk ke folder `web-app` dan jalankan perintah
+3. selanjutnya masuk ke folder `web-app` dan jalankan perintah
 ```
 -> docker build -t log-shipping-web-app:4 .
 ```
-3. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
-4. keluar dari folder `web-app` dan jalankan perintah
+4. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
+5. keluar dari folder `web-app` dan jalankan perintah
 ```
 -> docker-compose up -d
 ```
-5. pastikan terdapat container group baru seperti gambar dibawah.
+6. pastikan terdapat container group baru seperti gambar dibawah.
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20docker.png?token=ALAAYUCX3TUBSZNSJLPN4V3BVBTUK "Custom Log Shipping Docker")
 
-6. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
-7. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
+7. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
+8. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
 ```
 DECLARE @s NVARCHAR(128) = N'.\SQLLS1',
         @t NVARCHAR(128) = N'true',
@@ -49,25 +56,37 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
-8. lalu memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
+9. lalu memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
 ```
 -> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
 ```
-9. lakukan insiasi backup pertama kali dengan query berikut pada ssms
+10. lakukan insiasi backup pertama kali dengan query berikut pada ssms
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
-10. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
+11. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
-11. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503`
+12. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503`
+
+![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
+
+13. terakhir adalah membuat cron jobs untuk log backup tiap 15 menit dan menghapus file backup setiap 7 hari. pertama-tama kita harus masuk ke dalam container `SQLMASTERc` dengan perintah
+```
+-> 
+```
+dan di dalam container tersebut jalankan perintah
+```
+$ 
+```
 
 ## Reproduksi non-Docker
 
 ### Alat dan Bahan
 - Windows (ditest pada Windows 11 Home edition)
 - SQL server 2019 Express Edition, pada project ini menggunakan windows user authentication
+- SSMS (recommended, karena dapat mengobservasi linked server) atau sejenisnya
 - SQLCMD, cek `SQLCMD -?`, jika error install dari https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
 - FORFILES, cek `FORFILES -?`
 - VENV Python 3.8, cek `python --version`
