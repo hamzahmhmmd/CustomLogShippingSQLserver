@@ -2,7 +2,7 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
-> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu command bash pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux bash command, dan `>` yaitu script mongodb
+> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu shell command pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux shell command, dan `>` yaitu script mongodb
 
 ## Reproduksi berbasis Docker
 
@@ -26,7 +26,7 @@
 4. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
 
 ### Pebuatan container
-5. keluar dari folder `web-app` dan jalankan perintah
+5. keluar dari folder `web-app/` dan jalankan perintah
 ```
 -> docker-compose up -d
 ```
@@ -34,6 +34,10 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20docker.png?token=ALAAYUCX3TUBSZNSJLPN4V3BVBTUK "Custom Log Shipping Docker")
 
+**master instance**: `SQLMASTERc`
+**backup instance**: `SQLLS1c` dan `SQLLS2c`
+**mongo db server**: `MONGOc`
+**Web App server** : `WEBAPP`
 ### Pembuatan linked server
 7. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
 8. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
@@ -107,7 +111,7 @@ $
 2. install semua alat dan bahan, minimal 3 SQLserver, pada hal ini 
       - **master instance** : `localhost\SQLDEV`,
       - **backup instance** : `localhost\SQLLS1`, dan 
-      - **backup instance**: `localhost\SQLLS2`
+      - **backup instance** : `localhost\SQLLS2`
 3. install `requirements.txt`
 4. setelah itu membuat link dari **master** ke semua **backup** instance, pada hal ini `localhost\SQLLS1`
 ```
