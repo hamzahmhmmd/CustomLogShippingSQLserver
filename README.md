@@ -13,15 +13,19 @@
 
 ### Cara Pembuatan
 1. Clone repo ini dan masuk kedalam foldernya.
+
+### Pembuatan docker image
 2. Pembuatan docker image untuk SQLMASTER dan web app. Pertama tama masuk ke dalam folder `master-node/` dan jalankan perintah
 ```
 -> docker build -t mssql2019-lsdb-linked:2 .
 ```
-3. selanjutnya masuk ke folder `web-app` dan jalankan perintah
+3. selanjutnya masuk ke folder `web-app/` dan jalankan perintah
 ```
 -> docker build -t log-shipping-web-app:4 .
 ```
 4. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
+
+### Pebuatan container
 5. keluar dari folder `web-app` dan jalankan perintah
 ```
 -> docker-compose up -d
@@ -30,6 +34,7 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20docker.png?token=ALAAYUCX3TUBSZNSJLPN4V3BVBTUK "Custom Log Shipping Docker")
 
+### Pembuatan linked server
 7. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
 8. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
 ```
@@ -56,7 +61,9 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
-9. lalu memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
+
+### Pembuatan initial backup
+9. selanjutnya memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
 ```
 -> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
 ```
@@ -68,10 +75,13 @@ EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
-12. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503`
+
+### Penggunaan Web App
+12. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503` dan cara penggunaannya dapat dilihat di [sini](https://github.com/hamzahmhmmd/CustomLogShippingSQLserver/tree/docker-solution#cara-penggunaan-web-app) 
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
 
+### Pembuatan cron jobs
 13. terakhir adalah membuat cron jobs untuk log backup tiap 15 menit dan menghapus file backup setiap 7 hari. pertama-tama kita harus masuk ke dalam container `SQLMASTERc` dengan perintah
 ```
 -> 
