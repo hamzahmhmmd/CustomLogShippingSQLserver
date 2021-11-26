@@ -600,8 +600,9 @@ password = "xxx"
 ```
 26. refresh web app, dan custom log shipping selesai terpasang
 
-## Cara Penggunaan Web App
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
+
+## Cara Penggunaan Web App
 
 ## Ucapan terimakasih
 - https://sqlperformance.com/2014/10/sql-performance/readable-secondaries-on-a-budget karena telah berbaik hati membagikan sourcode yang menjadi dasar pengembangan projek ini
