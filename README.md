@@ -5,7 +5,7 @@
 > semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu shell command pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux shell command, dan `>` yaitu script mongodb
 
 ## Reproduksi berbasis Docker
-Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc`, **backup instance**: `SQLLS1c` dan `SQLLS2c`, **mongo db server**: `MONGOc`, **Web App server**: `WEBAPP`, terhubung dalam satu subnet `10.10.0.0/16` dan dua buah dockeer volume untuk masing-masing backup instance. 
+Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc` (custom mssql image), **backup instance**: `SQLLS1c` dan `SQLLS2c` (official mssql image), **mongo db server**: `MONGOc` (official mongo image), **Web App server**: `WEBAPP` (custom python image), terhubung dalam satu subnet `10.10.0.0/16` dan dua buah dockeer volume untuk masing-masing backup instance yang diinstall dengan docker-compose. 
 
 ### Alat dan bahan
 - Docker desktop (di test pada windows 11 dengan WSL2 backedend, namun seharusnya tidak masalah apapun host OS nya)
@@ -15,7 +15,7 @@ Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc`, **backup in
 ### Cara Pembuatan
 1. Clone repo ini dan masuk kedalam foldernya.
 
-### Pembuatan docker image
+#### Pembuatan docker image
 2. Pembuatan docker image untuk SQLMASTER dan web app. Pertama tama masuk ke dalam folder `master-node/` dan jalankan perintah
 ```
 -> docker build -t mssql2019-lsdb-linked:2 .
@@ -26,7 +26,7 @@ Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc`, **backup in
 ```
 4. check docker image anda, pastikan bertambah 2 item yaitu `mssql2019-lsdb-linked` dan `log-shipping-web-app` 
 
-### Pebuatan container
+#### Pebuatan container
 5. keluar dari folder `web-app/` dan jalankan perintah
 ```
 -> docker-compose up -d
@@ -35,7 +35,7 @@ Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc`, **backup in
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20docker.png?token=ALAAYUCX3TUBSZNSJLPN4V3BVBTUK "Custom Log Shipping Docker")
 
-### Pembuatan linked server
+#### Pembuatan linked server
 7. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
 8. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
 ```
@@ -63,7 +63,7 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',     
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
 
-### Pembuatan initial backup
+#### Pembuatan initial backup
 9. selanjutnya memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
 ```
 -> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
@@ -77,12 +77,12 @@ EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
 
-### Penggunaan Web App
+#### Penggunaan Web App
 12. setelah semua berhasil silahkan buka webapp pada browser dengan alamat `localhost:8503` dan cara penggunaannya dapat dilihat di [sini](https://github.com/hamzahmhmmd/CustomLogShippingSQLserver/tree/docker-solution#cara-penggunaan-web-app) 
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
 
-### Pembuatan cron jobs
+#### Pembuatan cron jobs
 13. terakhir adalah membuat cron jobs untuk log backup tiap 15 menit dan menghapus file backup setiap 7 hari. pertama-tama kita harus masuk ke dalam container `SQLMASTERc` dengan perintah
 ```
 -> 
@@ -93,6 +93,7 @@ $
 ```
 
 ## Reproduksi non-Docker
+Solusi non-docker ini tidak hanya dapat dilakukan tanpa docker, tetap dapat menggunakan docker container namun dengan penyesuaian. Solusi ini memiliki kelebihan karena sistem oprasi windows dapat digunakan sebagai metode autentikasi setiap instance mssql sehingga lebih mudah dibanding docker yang berbasis linux.
 
 ### Alat dan Bahan
 - Windows (ditest pada Windows 11 Home edition)
