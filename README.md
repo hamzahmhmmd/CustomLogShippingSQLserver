@@ -5,6 +5,7 @@
 > semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu shell command pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux shell command, dan `>` yaitu script mongodb
 
 ## Reproduksi berbasis Docker
+Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc`, **backup instance**: `SQLLS1c` dan `SQLLS2c`, **mongo db server**: `MONGOc`, **Web App server**: `WEBAPP`, terhubung dalam satu subnet `10.10.0.0/16` dan dua buah dockeer volume untuk masing-masing backup instance. 
 
 ### Alat dan bahan
 - Docker desktop (di test pada windows 11 dengan WSL2 backedend, namun seharusnya tidak masalah apapun host OS nya)
@@ -34,10 +35,6 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20docker.png?token=ALAAYUCX3TUBSZNSJLPN4V3BVBTUK "Custom Log Shipping Docker")
 
-**master instance**: `SQLMASTERc`
-**backup instance**: `SQLLS1c` dan `SQLLS2c`
-**mongo db server**: `MONGOc`
-**Web App server** : `WEBAPP`
 ### Pembuatan linked server
 7. masuk ke instance `SQLMASTERc` melalui ssms dengan server `localhost,1336` dan user `SA` dan password `Root05211840000048`
 8. tambahkan backup instance `SQLLS1c` dan `SQLLS2c` sebagai linked server dengan perintah
