@@ -11,6 +11,8 @@ services:
     container_name: WEBAPP
     ports:
       - '8503:8501'
+    environment:
+      - TZ=Asia/Jakarta
     volumes:
       - 'ls-transport-1:/tmp/SQL1:ro'
       - 'ls-transport-2:/tmp/SQL2:ro'
@@ -49,7 +51,7 @@ services:
       - TZ=Asia/Jakarta
     volumes:
       - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
-      - ls-transport-1:/tmp/SQL1:ro
+      - ls-transport-1:/tmp/SQL1
     networks:
       frontend:
         ipv4_address: 10.10.10.12
@@ -65,7 +67,7 @@ services:
       - TZ=Asia/Jakarta
     volumes:
       - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
-      - ls-transport-2:/tmp/SQL2:ro
+      - ls-transport-2:/tmp/SQL2
     networks:
       frontend:
         ipv4_address: 10.10.10.13

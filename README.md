@@ -54,7 +54,7 @@ GO
 DECLARE @s NVARCHAR(128) = N'.\SQLLS2',
         @t NVARCHAR(128) = N'true',
         @p NVARCHAR(128) = N'MSOLEDBSQL',
-        @i NVARCHAR(128) = N'10.10.10.12,1433';
+        @i NVARCHAR(128) = N'10.10.10.13,1433';
 EXEC [master].dbo.sp_addlinkedserver   @server     = @s, @srvproduct = N'', @provider = @p,  @datasrc  = @i;
 EXEC [master].dbo.sp_addlinkedsrvlogin @rmtsrvname = @s, @useself = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'collation compatible', @optvalue = @t;
@@ -66,14 +66,19 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out', 
 #### Pembuatan initial backup
 9. selanjutnya memberikan permision user `mssql` pada master instance untuk menulis di volume `ls-transport` yang menempel pada `/tmp` masing-masing instance
 ```
--> sudo docker exec -u 0 SQLMASTERc bash -c "chown mssql /tmp"
+-> docker exec -u 0 SQLMASTERc bash -c "chmod 777 /tmp"
+-> docker exec -u 0 SQLMASTERc bash -c "chmod -R 777 /tmp"
 ```
 10. lakukan insiasi backup pertama kali dengan query berikut pada ssms
 ```
+USE [LSDB];
+GO
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
 11. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
 ```
+USE [LSDB];
+GO
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
 
@@ -82,14 +87,48 @@ EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
 
-#### Pembuatan cron jobs
-13. terakhir adalah membuat cron jobs untuk log backup tiap 15 menit dan menghapus file backup setiap 7 hari. pertama-tama kita harus masuk ke dalam container `SQLMASTERc` dengan perintah
+#### Automisasi Logbackup & Clear history
+13. terakhir adalah mengautomisasi oprasi backup dan menghapus file log yang telah tidak terpakai, kita dapat menggunakan task scheduler jika host os anda adalah windows dengan cara [ini](https://github.com/hamzahmhmmd/CustomLogShippingSQLserver/tree/docker-solution#Automisasi) solusi lainnya adalah membuat cron jobs untuk log backup tiap 15 menit dan menghapus file backup setiap 7 hari. pertama-tama kita harus masuk ke dalam container `WEBAPP` dengan perintah
 ```
--> 
+-> docker exec -it -u 0 WEBAPP "bash"
 ```
-dan di dalam container tersebut jalankan perintah
+di dalam container tersebut install `cron` dengan perintah
 ```
-$ 
+$ apt-get update
+$ apt-get install cron -y 
+```
+edit crontab dengan perintah `$ crontab -e` dan menambahkan 3 baris terakhir sehingga menjadi
+```
+# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# ...
+# ...
+# ...
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
+*/15 * * * * /opt/mssql-tools/bin/sqlcmd -S SQLMASTERc,1433 -U SA -P Root05211840000048 -d LSDB -Q "EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';"  # for log backup every 15 min
+0 0 * * 0 /opt/mssql-tools/bin/sqlcmd -S SQLMASTERc,1433 -U SA -P Root05211840000048 -d LSDB -Q "EXEC dbo.PMAG_CleanupHistory @dbname = N'LSDB', @DaysOld = 7;"  # for clear history every week
+0 0 * * 0 find /tmp/SQL1/*.trn -mtime +7 -exec rm {} \;  # remove .trn file older than 7 days for backup instance SQLLS1
+0 0 * * 0 find /tmp/SQL2/*.trn -mtime +7 -exec rm {} \;  # remove .trn file older than 7 days for backup instance SQLLS2
+
+```
+jika ingin memodifikasi interval proses tersebut dapat mengedit 5 karakter terdepan seperti `0 0 * * 0` pada syntax diatas, dengan referensi https://crontab.tech/every-week
+
+dan strat cron demon dengan perintah
+```
+$ /etc/init.d/cron start
+```
+jika ingin menyetop cron demon dengan perintah
+```
+$ /etc/init.d/cron stop
 ```
 
 ## Reproduksi non-Docker
@@ -104,13 +143,18 @@ Solusi non-docker ini tidak hanya dapat dilakukan tanpa docker, tetap dapat meng
 - VENV Python 3.8, cek `python --version`
 - Mongodb v5.0.4, cek `mongo`
 
-### Cara pembuatan
+### Cara Pembuatan
 1. git clone repo ini `git clone https://github.com/hamzahmhmmd/CustomLogShippingSQLserver.git`
+#### Instalasi alat dan bahan
 2. install semua alat dan bahan, minimal 3 SQLserver, pada hal ini 
       - **master instance** : `localhost\SQLDEV`,
       - **backup instance** : `localhost\SQLLS1`, dan 
       - **backup instance** : `localhost\SQLLS2`
-3. install `requirements.txt`
+3. install `requirements.txt` dengan
+```
+-> pip install -r requirements.txt
+```
+#### Menghubungakan instance backup ke instance master
 4. setelah itu membuat link dari **master** ke semua **backup** instance, pada hal ini `localhost\SQLLS1`
 ```
 USE [master];
@@ -137,6 +181,7 @@ EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'data acces
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc',                  @optvalue = @t;
 EXEC [master].dbo.sp_serveroption      @server     = @s, @optname = N'rpc out',              @optvalue = @t;
 ```
+#### Pembuatan database & table
 5. lalu pada instance **master** buat database `LSDB`. Database ini akan berisi beberapa tabel seperti gambar dibawah dan membuat mode recovery FULL dengan 
 ```
 USE [master];
@@ -200,6 +245,7 @@ CREATE TABLE dbo.PMAG_LogRestoreHistory
 );
 GO
 ```
+#### Pembuatan StoreProcedure yang menjadi backbone proses logshipping
 10. selanjutnya membuat **store procedure** untuk menangani proses backup pada database `LSDB`
 ```
 CREATE OR ALTER PROCEDURE [dbo].[PMAG_Backup]
@@ -481,6 +527,7 @@ BEGIN
     WHERE DatabaseName = @dbname;
 END
 ```
+#### Membuat view untuk memudahkan monitoring
 16. Untuk mempermudah monitoring dari proses log shipping maka dibuat view, view berikut digunakan untuk melihat backup yang berhasil dibuat
 ```
 CREATE OR ALTER VIEW [dbo].[PMAG_BackupRestoreReport] AS SELECT
@@ -517,6 +564,7 @@ AS
     FROM dbo.PMAG_Secondaries
     WHERE IsCurrentStandby = 1;
 ```
+#### Mendata database yang akan dibackup
 18. selanjutnya adalah memilih database yang akan dibackup, contohnya seperti database `LSDB` itu sendiri
 ```
 USE LSDB;
@@ -559,6 +607,7 @@ FROM (SELECT * FROM sys.master_files WHERE type_desc = 'ROWS' ) mdf
 JOIN (SELECT * FROM sys.master_files WHERE type_desc = 'LOG' ) ldf
 ON mdf.database_id = ldf.database_id
 ```
+#### Inisiasi Backup
 20. setelah selesai, maka initial backup untuk `LSDB` dapat dilakukan dengan mengeksekusi SP `PMAG_Backup` dengan parameter `type = bak` dan `init = 1`
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
@@ -567,9 +616,20 @@ EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
+#### Automisasi
 22. jika semua lancar, maka otomasi dapat dilakukan dengan **Task Scheduler**
-```
-```
+    1. buka task scheduler (pastikan dengan windows user yang memiliki hak akses ke SQL server DB)
+    2. create basic task
+    ```
+    place holder gambar
+    ```
+    3. isi name dan description, trigger = **Daily**, recur every **1** days, action = **start  program**, browse program/script dan pilih file `logbackup.bat` yang ada dalam folder `batchfile/` dan finish jangan lupa check ✅ open the properties dialog
+    4. ikuti konfigurasi pada gambar dibawah khususnya pada bagian yang di highlight hijau, dan setiap optionsnya cukup jelas untuk diartikan
+    ```
+    placeholder gambar
+    ```
+    
+#### Konfigurasi MongoDB
 23. setelah memastikan setiap task sukses berjalan dengan otomatis, selanjutnya membuat document pada collections `lsdb` yang menampung credentials dari **master instance** yaitu `localhost\SQLDEV` dengan db `LSDB` dengan terminal run command berikut untuk masuk ke mongodb shell
 ```
 -> mongo
@@ -586,6 +646,7 @@ lalu membuat document dalam collections `lsdb` pada database `logshipping` denga
     "trusted_connection" : "yes"
   }])
 ```
+#### Menjalankan Web App
 24. setelah  maka sekarang waktunya run webserver untuk monitoring. Pastikan file `webserver.py` terdownload dan `requirements.txt` berhasil terinstall, lalu run command dibawah pada terminal dan jangan ditutup dan buka url yang tertera di terminal
 ```
 -> streamlit run webserver.py
