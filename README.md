@@ -617,17 +617,30 @@ EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
 #### Automisasi
-22. jika semua lancar, maka otomasi dapat dilakukan dengan **Task Scheduler**
+22. jika semua lancar, maka otomasi dapat dilakukan dengan **Task Scheduler** untuk dua task yaitu clear backup history dan log backup yang terdapat pada folder `batchfile/`
     1. buka task scheduler (pastikan dengan windows user yang memiliki hak akses ke SQL server DB)
     2. create basic task
-    ```
-    place holder gambar
-    ```
-    3. isi name dan description, trigger = **Daily**, recur every **1** days, action = **start  program**, browse program/script dan pilih file `logbackup.bat` yang ada dalam folder `batchfile/` dan finish jangan lupa check ✅ open the properties dialog
+    
+    ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20task%20scheduler%201.png?token=ALAAYUHKLLWJ4424WVLVVY3BVWSNG)
+    
+    3. seltelah itu isi name dan description, trigger = **Daily**, recur every **1** days, action = **start  program**, browse program/script dan pilih file `logbackup.bat` yang ada dalam folder `batchfile/` dan finish jangan lupa check ✅ open the properties dialog
     4. ikuti konfigurasi pada gambar dibawah khususnya pada bagian yang di highlight hijau, dan setiap optionsnya cukup jelas untuk diartikan
-    ```
-    placeholder gambar
-    ```
+
+    ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20task%20scheduler%202.png?token=ALAAYUCE653YZ56ZPDTI7MDBVWSX2)
+    
+    pada gambar diatas pastikan user yang menjalankan task adalah user yang memiliki hak akses ke instance master
+    
+    ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20task%20scheduler%203.png?token=ALAAYUEMBVN546GUJMGNXH3BVWSZS)
+
+    pada gambar diatas nilai 15 menit dapat disesuaikan sesuai kebutuhan, misalnya untuk task clear history dapat dipilih opsi untuk berjalan 7 hari sekali
+    
+    ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20task%20scheduler%204.png?token=ALAAYUAJFIWNWZKMLLEAFGLBVWS2K)
+    
+    pada gambar diatas untuk pengguna laptop dapat menonaktifkan opsi untuk running task hanya saat AC powered sehingga saat laptop menggunakan battery task akan tetap berjalan
+    
+    ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20task%20scheduler%205.png?token=ALAAYUGBXDD5RA5FFHGLLGLBVWS3G)
+    
+    pada gambar diatas disarankan untuk run task as soon as posible, dan dilanjutkan klick `OK`
     
 #### Konfigurasi MongoDB
 23. setelah memastikan setiap task sukses berjalan dengan otomatis, selanjutnya membuat document pada collections `lsdb` yang menampung credentials dari **master instance** yaitu `localhost\SQLDEV` dengan db `LSDB` dengan terminal run command berikut untuk masuk ke mongodb shell
