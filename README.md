@@ -483,6 +483,19 @@ END
 ```
 13. selanjutnya adalah membuat SP untuk mendapatkan daftar backup instance yang aktif (memiliki data paling up to date, dibanding backup instance lain)
 ```
+CREATE OR ALTER PROCEDURE dbo.PMAG_GetActiveSecondary
+  @dbname SYSNAME
+AS
+BEGIN
+  SET NOCOUNT ON;
+ 
+  SELECT ServerInstance
+    FROM dbo.PMAG_ActiveSecondaries
+    WHERE DatabaseName = @dbname;
+END
+```
+14. SP yang terakhir adalah untuk memudahkan proses penghapusan history backup
+```
 CREATE OR ALTER PROCEDURE dbo.PMAG_CleanupHistory
   @dbname   SYSNAME,
   @DaysOld  INT = 7
@@ -516,21 +529,8 @@ BEGIN
     AND BackupSetID <= @cutoff;
 END
 ```
-15. SP yang terakhir adalah untuk memudahkan proses penghapusan history backup
-```
-CREATE OR ALTER PROCEDURE dbo.PMAG_GetActiveSecondary
-  @dbname SYSNAME
-AS
-BEGIN
-  SET NOCOUNT ON;
- 
-  SELECT ServerInstance
-    FROM dbo.PMAG_ActiveSecondaries
-    WHERE DatabaseName = @dbname;
-END
-```
 #### Membuat view untuk memudahkan monitoring
-16. Untuk mempermudah monitoring dari proses log shipping maka dibuat view, view berikut digunakan untuk melihat backup yang berhasil dibuat
+15. Untuk mempermudah monitoring dari proses log shipping maka dibuat view, view berikut digunakan untuk melihat backup yang berhasil dibuat
 ```
 CREATE OR ALTER VIEW [dbo].[PMAG_BackupRestoreReport] AS SELECT
 	b.BackupSetID as [ID],
@@ -558,7 +558,7 @@ FROM dbo.PMAG_LogBackupHistory b
 	FULL OUTER JOIN dbo.PMAG_LogRestoreHistory r ON b.BackupSetID=r.BackupSetID AND b.ServerInstance= r.ServerInstance AND b.DatabaseName= r.DatabaseName
 WHERE b.BackupSetID IS NULL OR r.BackupSetID IS NULL;
 ```
-17. view terakhir adalah untuk melihat backup instance mana yang sedang aktif (memiliki data paling up to date dibanding backup instece lain)
+16. view terakhir adalah untuk melihat backup instance mana yang sedang aktif (memiliki data paling up to date dibanding backup instece lain)
 ```
 CREATE OR ALTER VIEW dbo.PMAG_ActiveSecondaries
 AS
@@ -567,13 +567,13 @@ AS
     WHERE IsCurrentStandby = 1;
 ```
 #### Mendata database yang akan dibackup
-18. selanjutnya adalah memilih database yang akan dibackup, contohnya seperti database `LSDB` itu sendiri
+17. selanjutnya adalah memilih database yang akan dibackup, contohnya seperti database `LSDB` itu sendiri
 ```
 USE LSDB;
 GO
 INSERT dbo.PMAG_Databases(DatabaseName) SELECT N'LSDB';
 ```
-19. selanjutnya adalah memilih backup instance untuk db `LSDB` yaitu `localhost\SQLLS1` dan `localhost\SQLLS2`. Setiap instance memiliki _DataFolder_ dan _LogFolder_ masing-masing umumnya pada `C:\Program Files\Microsoft SQL Server\MSSQL15.{nama instance}\MSSQL\DATA\` untuk itu dapat dipastikan ulang lewat file explorer apakah folder tersebut ada. Untuk folder backup dam standby dari tiap backup instance adalah `D:\SQLLS1\` dan  `D:\SQLLS2\`.
+18. selanjutnya adalah memilih backup instance untuk db `LSDB` yaitu `localhost\SQLLS1` dan `localhost\SQLLS2`. Setiap instance memiliki _DataFolder_ dan _LogFolder_ masing-masing umumnya pada `C:\Program Files\Microsoft SQL Server\MSSQL15.{nama instance}\MSSQL\DATA\` untuk itu dapat dipastikan ulang lewat file explorer apakah folder tersebut ada. Untuk folder backup dam standby dari tiap backup instance adalah `D:\SQLLS1\` dan  `D:\SQLLS2\`.
 ```
 INSERT dbo.PMAG_Secondaries
 (
@@ -610,16 +610,16 @@ JOIN (SELECT * FROM sys.master_files WHERE type_desc = 'LOG' ) ldf
 ON mdf.database_id = ldf.database_id
 ```
 #### Inisiasi Backup
-20. setelah selesai, maka initial backup untuk `LSDB` dapat dilakukan dengan mengeksekusi SP `PMAG_Backup` dengan parameter `type = bak` dan `init = 1`
+19. setelah selesai, maka initial backup untuk `LSDB` dapat dilakukan dengan mengeksekusi SP `PMAG_Backup` dengan parameter `type = bak` dan `init = 1`
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'bak', @init = 1;
 ```
-21. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
+20. jika berhasil, dapat dicoba untuk melakukan log backup dengan SP yang sama namun dengan parameter  `type = trn` 
 ```
 EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
 ```
 #### Automisasi
-22. jika semua lancar, maka otomasi dapat dilakukan dengan **Task Scheduler** untuk dua task yaitu clear backup history dan log backup yang terdapat pada folder `batchfile/`
+21. jika semua lancar, maka otomasi dapat dilakukan dengan **Task Scheduler** untuk dua task yaitu clear backup history dan log backup yang terdapat pada folder `batchfile/`
     1. buka task scheduler (pastikan dengan windows user yang memiliki hak akses ke SQL server DB)
     2. create basic task
     
@@ -645,7 +645,7 @@ EXEC dbo.PMAG_Backup @dbname = N'LSDB', @type = 'trn';
     pada gambar diatas disarankan untuk run task as soon as posible, dan dilanjutkan klick `OK`
     
 #### Konfigurasi MongoDB
-23. setelah memastikan setiap task sukses berjalan dengan otomatis, selanjutnya membuat document pada collections `lsdb` yang menampung credentials dari **master instance** yaitu `localhost\SQLDEV` dengan db `LSDB` dengan terminal run command berikut untuk masuk ke mongodb shell
+22. setelah memastikan setiap task sukses berjalan dengan otomatis, selanjutnya membuat document pada collections `lsdb` yang menampung credentials dari **master instance** yaitu `localhost\SQLDEV` dengan db `LSDB` dengan terminal run command berikut untuk masuk ke mongodb shell
 ```
 -> mongo
 ```
@@ -662,11 +662,11 @@ lalu membuat document dalam collections `lsdb` pada database `logshipping` denga
   }])
 ```
 #### Menjalankan Web App
-24. setelah  maka sekarang waktunya run webserver untuk monitoring. Pastikan file `webserver.py` terdownload dan `requirements.txt` berhasil terinstall, lalu run command dibawah pada terminal dan jangan ditutup dan buka url yang tertera di terminal
+23. setelah  maka sekarang waktunya run webserver untuk monitoring. Pastikan file `webserver.py` terdownload dan `requirements.txt` berhasil terinstall, lalu run command dibawah pada terminal dan jangan ditutup dan buka url yang tertera di terminal
 ```
 -> streamlit run webserver.py
 ```
-25. maka akan terdapat pesan error karena masih belum terhubung ke mongodb, maka harus membuat file `secrets.toml` dalam folder `.streamlit/` yang berada pada root directory python environment yang digunakan, berikut isi dari file `.streamlit/secrets.toml`, untuk lebih lengkap dapat dilihat pada https://docs.streamlit.io/knowledge-base/tutorials/databases/mongodb
+24. maka akan terdapat pesan error karena masih belum terhubung ke mongodb, maka harus membuat file `secrets.toml` dalam folder `.streamlit/` yang berada pada root directory python environment yang digunakan, berikut isi dari file `.streamlit/secrets.toml`, untuk lebih lengkap dapat dilihat pada https://docs.streamlit.io/knowledge-base/tutorials/databases/mongodb
 ```
 # .streamlit/secrets.toml
 
@@ -676,7 +676,7 @@ port = 27017
 username = "xxx"  # if using password
 password = "xxx"
 ```
-26. refresh web app, dan custom log shipping selesai terpasang
+25. refresh web app, dan custom log shipping selesai terpasang
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
 
