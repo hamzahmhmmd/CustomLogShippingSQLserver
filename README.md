@@ -5,6 +5,7 @@
 > semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu shell command pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux shell command, dan `>` yaitu script mongodb
 
 ## Reproduksi berbasis Docker
+[![video installasi berbasis docker](https://test.com/test.png)](https://itsacid-my.sharepoint.com/:v:/g/personal/05211840000048_mahasiswa_integra_its_ac_id/Ee390ZZx8fRHg5ZdGud0rG0BcjPzjQ3hKAUr_TUsjvbqQg?e=QFDnr9)
 Solusi berbasis docker ini berisi **master instance**: `SQLMASTERc` (custom mssql image), **backup instance**: `SQLLS1c` dan `SQLLS2c` (official mssql image), **mongo db server**: `MONGOc` (official mongo image), **Web App server**: `WEBAPP` (custom python image), terhubung dalam satu subnet `10.10.0.0/16` dan dua buah dockeer volume untuk masing-masing backup instance yang diinstall dengan docker-compose. 
 
 ### Alat dan bahan
@@ -680,6 +681,9 @@ password = "xxx"
 
 ## Cara Penggunaan Web App
 [![cara menggunakan web app](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20video.png?token=ALAAYUG2TV37SYQLNUQJ643BVXIBC)](https://itsacid-my.sharepoint.com/:v:/g/personal/05211840000048_mahasiswa_integra_its_ac_id/EZaSwNWMcclCq0HaTyH5kqcBjWS8wqLMoX21c1gqP8KIHg?e=2xXP7O)
+
+## Proses pembuatan
+[![proses pembuatan](https://test.com/test.png)](https://itsacid-my.sharepoint.com/:v:/g/personal/05211840000048_mahasiswa_integra_its_ac_id/EdQ8BNpjuA1CqXcAZZHPCFQBr5djghovB0GSBZBFWyMkzQ?e=qzs6ak)
 
 ## Ucapan terimakasih
 - https://sqlperformance.com/2014/10/sql-performance/readable-secondaries-on-a-budget karena telah berbaik hati membagikan sourcode yang menjadi dasar pengembangan projek ini
