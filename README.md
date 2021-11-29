@@ -679,6 +679,7 @@ password = "xxx"
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20webapp.png?token=ALAAYUHLDKCCDU7Z6Y5EMP3BUXIMW "Custom Log Shipping Web App")
 
 ## Cara Penggunaan Web App
+[![cara menggunakan web app](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20webapp%20video.png?token=ALAAYUG2TV37SYQLNUQJ643BVXIBC)](https://itsacid-my.sharepoint.com/:v:/g/personal/05211840000048_mahasiswa_integra_its_ac_id/EZaSwNWMcclCq0HaTyH5kqcBjWS8wqLMoX21c1gqP8KIHg?e=2xXP7O)
 
 ## Ucapan terimakasih
 - https://sqlperformance.com/2014/10/sql-performance/readable-secondaries-on-a-budget karena telah berbaik hati membagikan sourcode yang menjadi dasar pengembangan projek ini
