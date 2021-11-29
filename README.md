@@ -2,10 +2,8 @@
 
 ![alt text](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/master/images/Custom%20log%20shipping%20architecture.jpg?token=ALAAYUEEDQMBBOYWPBXLGDLBUXIGC "Custom Log Shipping Architecture")
 
-> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu shell command pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux shell command, dan `>` yaitu script mongodb
-
-> Gunakan daftar isi karena README.md ini sangat panjang, namun tersusun dengan rapih.
-![alt text]<img src="https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/daftar-isi.png?token=ALAAYUAMNNM7ANWLQ7JJ6GTBVXMPK" width="250" height="auto">
+> semua code yang ada pada repo ini adalah query SQL, kecuali yang dimulai dengan `->` yaitu shell command pada windows (dapat dijalankan pada linux dengan penyesuaian), `$` yaitu linux shell command, dan `>` yaitu script mongodb dan gunakan daftar isi
+> <img src="https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/daftar-isi.png?token=ALAAYUAMNNM7ANWLQ7JJ6GTBVXMPK" width="250" height="auto">
 
 ## Reproduksi berbasis Docker
 [![video installasi berbasis docker](https://raw.githubusercontent.com/hamzahmhmmd/CustomLogShippingSQLserver/docker-solution/images/Custom%20log%20shipping%20install%20video.png?token=ALAAYUC6BMXQNR2TEUJ55Q3BVXLLM)](https://itsacid-my.sharepoint.com/:v:/g/personal/05211840000048_mahasiswa_integra_its_ac_id/Ee390ZZx8fRHg5ZdGud0rG0BcjPzjQ3hKAUr_TUsjvbqQg?e=QFDnr9)
