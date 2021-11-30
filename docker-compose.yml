@@ -49,6 +49,7 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Root05211840000048
       - TZ=Asia/Jakarta
+      - MSSQL_PID=Express
     volumes:
       - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
       - ls-transport-1:/tmp/SQL1
@@ -65,6 +66,7 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Root05211840000048
       - TZ=Asia/Jakarta
+      - MSSQL_PID=Express
     volumes:
       - ./init/mssql-chmod.sh:/docker-entrypoint-initdb.d/mssql-chmod.sh:ro
       - ls-transport-2:/tmp/SQL2
